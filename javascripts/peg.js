@@ -38,18 +38,17 @@ var PEG = (function () {
           var lowest = tannerGraph.getCheckNodeWithLowestDegree();
           tannerGraph.createEdge(symbolNode.id, lowest.id);
           hook && hook(tannerGraph);
-          intter = calculateModularSums(edges_connected, symbolNodeValues);
 
-          console.log("haha2" + intter);
           if (!edges_connected[lowest.id]) {
             edges_connected[lowest.id] = []; // Initialize an array for this check node if it doesn't exist
           }
           edges_connected[lowest.id].push(symbolNode.id); // Add the symbol node to the array
           // Refresh the labels of check nodes
+          symbolNodeInputs = reverseDictionary(edges_connected);
           intter = calculateModularSums(edges_connected, symbolNodeValues);
           for (var n = 0; n < intter.length; n++) {
             // Perform some update operation, for example, multiplying each element by 2
-            checkNodeValues[n] = intter[n];
+            calculatedValue[n] = intter[n];
           }
           tannerGraph.refreshCheckNodeLabels();
           // we need to look at the subgraph from this symbol node to decide edge
@@ -67,9 +66,8 @@ var PEG = (function () {
               intter = calculateModularSums(edges_connected, symbolNodeValues);
               for (var n = 0; n < intter.length; n++) {
                 // Perform some update operation, for example, multiplying each element by 2
-                checkNodeValues[n] = intter[n];
+                calculatedValue[n] = intter[n];
               }
-              console.log("second" + intter);
 
               tannerGraph.refreshCheckNodeLabels();
 
@@ -82,7 +80,6 @@ var PEG = (function () {
               var lowest = previousSubGraph.getUCCheckNodeWithLowestDegree();
               tannerGraph.createEdge(symbolNode.id, lowest.id);
               hook && hook(tannerGraph);
-              intter = calculateModularSums(edges_connected, symbolNodeValues);
 
               console.log("haha" + intter);
 
@@ -90,26 +87,25 @@ var PEG = (function () {
                 edges_connected[lowest.id] = []; // Initialize an array for this check node if it doesn't exist
               }
               edges_connected[lowest.id].push(symbolNode.id); // Add the symbol node to the array
+              symbolNodeInputs = reverseDictionary(edges_connected);
 
               // Refresh the labels of symbol nodes
               intter = calculateModularSums(edges_connected, symbolNodeValues);
               for (var n = 0; n < intter.length; n++) {
                 // Perform some update operation, for example, multiplying each element by 2
-                checkNodeValues[n] = intter[n];
+                calculatedValue[n] = intter[n];
               }
+
               tannerGraph.refreshSymbolNodeLabels();
 
               // Refresh the labels of check nodes
-              intter = calculateModularSums(edges_connected, symbolNodeValues);
+              calculatedValue = calculateModularSums(edges_connected, symbolNodeValues);
 
-              for (var n = 0; n < intter.length; n++) {
-                // Perform some update operation, for example, multiplying each element by 2
-                checkNodeValues[n] = intter[n];
-              }
+              
+
               console.log(symbolNodeValues);
               console.log(edges_connected);
-              var hi = Object.keys(edges_connected).length;
-              console.log(hi);
+              console.log(symbolNodeInputs);
 
               tannerGraph.refreshCheckNodeLabels();
               break;
@@ -122,7 +118,7 @@ var PEG = (function () {
             // this means level stopped increasing: first condition is satisfied
             if (nextSubGraph.level === currentSubGraph.level) {
               // select the check node with the lowest degree among the nodes not covered by this subgraph
-              intter = calculateModularSums(edges_connected, symbolNodeValues);
+              calculatedValue = calculateModularSums(edges_connected, symbolNodeValues);
               // for (var n = 0; n < intter.length; n++) {
               //   // Perform some update operation, for example, multiplying each element by 2
               //   checkNodeValues[n] = intter[n];
@@ -136,14 +132,17 @@ var PEG = (function () {
               if (!edges_connected[lowest.id]) {
                 edges_connected[lowest.id] = []; // Initialize an array for this check node if it doesn't exist
               }
+
               edges_connected[lowest.id].push(symbolNode.id); // Add the symbol node to the array
+              symbolNodeInputs = reverseDictionary(edges_connected);
+              
               console.log(edges_connected);
 
               // Refresh the labels of symbol nodes
               tannerGraph.refreshSymbolNodeLabels();
 
-              // Refresh the labels of check nodes
-              // intter = calculateModularSums(edges_connected, symbolNodeValues);
+              calculatedValue = calculateModularSums(edges_connected, symbolNodeValues);
+              
 
               console.log("fifth 5 " + intter);
               tannerGraph.refreshCheckNodeLabels();
@@ -186,8 +185,37 @@ var PEG = (function () {
   };
 })();
 
-function calculateModularSums(inputDict, symbolNodeValues) {
+// function calculateModularSums(inputDict, symbolNodeValues) {
+//   // Initialize an empty array to store modular sums.
+//   let modularSums = [];
+
+//   // Iterate through the keys in the dictionary.
+//   for (let key in inputDict) {
+//     if (inputDict.hasOwnProperty(key)) {
+//       // Get the array associated with the current key.
+//       let currentArray = inputDict[key];
+
+//       // Calculate the modular sum for the current array using XOR.
+//       let sum = 0;
+//       for (let i = 0; i < currentArray.length; i++) {
+//         // Get the value for the current index from symbolNodeValues.
+//         let indexValue = symbolNodeValues[currentArray[i]];
+
+//         // Calculate the modular sum using XOR (^) operation.
+//         sum ^= indexValue;
+//       }
+
+//       // Add the modular sum to the result array.
+//       modularSums.push(sum);
+//     }
+//   }
+
+//   return modularSums;
+// }
+
+function calculateModularSums(inputDict, newNameoriginal) {
   // Initialize an empty array to store modular sums.
+   var newName=Array.from(newNameoriginal);
   let modularSums = [];
 
   // Iterate through the keys in the dictionary.
@@ -199,8 +227,8 @@ function calculateModularSums(inputDict, symbolNodeValues) {
       // Calculate the modular sum for the current array using XOR.
       let sum = 0;
       for (let i = 0; i < currentArray.length; i++) {
-        // Get the value for the current index from symbolNodeValues.
-        let indexValue = symbolNodeValues[currentArray[i]];
+        // Get the value for the current index from newName.
+        let indexValue = newName[currentArray[i]];
 
         // Calculate the modular sum using XOR (^) operation.
         sum ^= indexValue;
@@ -211,37 +239,34 @@ function calculateModularSums(inputDict, symbolNodeValues) {
     }
   }
 
-  return modularSums;
-}
-// function Input_cheker(modular_sum, edges_dic, NodeValues, check) {
-//   for (i = 0; i < modular_sum.length; i++) {
-//     var cheknodeindex = Object.keys(edges_dic);
-//     if (check[i] != modular_sum[i]) {
-//       var m = cheknodeindex[i];
-//       var n = edges_dic[m];
+  // Update newName to make every modular sum 0.
+  for (let i = 0; i < modularSums.length; i++) {
+    // Iterate through the array indices associated with the current key.
+    let currentArray = inputDict[Object.keys(inputDict)[i]];
+    for (let j = 0; j < currentArray.length; j++) {
+      // Update the newName for the current index to make the modular sum 0.
+      newName[currentArray[j]] ^= modularSums[i];
+    }
+  }
 
-//       var upd;
-//       for (j = 0; j < n; j++) {
-//         if (n % 2 === 0) {
-//           upd = (n % 2) + 1;
-//           for (c = 0; c < j; c++) {
-//             if (c < upd) {
-//               NodeValues[edges_dic[m][c]] = 1;
-//             } else {
-//               NodeValues[edges_dic[m][c]] = 0;
-//             }
-//           }
-//         } else {
-//           upd = (n + 1) % 2;
-//           for (c = 0; c < j; c++) {
-//             if (c < upd) {
-//               NodeValues[edges_dic[m][c]] = 1;
-//             } else {
-//               NodeValues[edges_dic[m][c]] = 0;
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
+  // Return the updated newName.
+  return newName;
+}
+
+
+function reverseDictionary(originalDict) {
+  const reversedDict = {};
+  var x = symbolNodeValues.length;
+  for (const nodeA in originalDict) {
+    const symbolsA = originalDict[nodeA];
+    for (const symbolA of symbolsA) {
+      if (reversedDict.hasOwnProperty(symbolA)) {
+        reversedDict[symbolA].push(nodeA - x);
+      } else {
+        reversedDict[symbolA] = [nodeA - x];
+      }
+    }
+  }
+
+  return reversedDict;
+}

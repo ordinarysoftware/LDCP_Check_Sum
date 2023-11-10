@@ -10,7 +10,7 @@ var TannerGraph = function (matrix) {
     return {
       matrixIdx: index,
       id: index,
-      label: "S" + index + "\n Value: " + symbolNodeValues[index]+ "\n" +symbolNodeInputs[index] +"\n"+ calculatedValue[index],
+      label: "S" + index + "\n Value: " + symbolNodeValues[index]+ "\n Edges: " +symbolNodeInputs[index] +"\n Final: "+ calculatedValue[index],
       connections: [],
       group: "symbol",
     };
@@ -34,7 +34,7 @@ var TannerGraph = function (matrix) {
   // Method to refresh the labels of all symbol nodes
   this.refreshSymbolNodeLabels = function () {
     for (var i = 0; i < this.symbolNodes.length; i++) {
-      this.symbolNodes[i].label = "S" + i + "\n Value: " + symbolNodeValues[i] + "\n" +symbolNodeInputs[i] +"\n"+ calculatedValue[i];
+      this.symbolNodes[i].label = "S" + i + "\n Value: " + symbolNodeValues[i] + "\n Edges: " +symbolNodeInputs[i] +"\n Final: "+ calculatedValue[i];
     }
   };
 
